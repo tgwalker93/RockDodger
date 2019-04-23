@@ -12,27 +12,19 @@ Public Class Form1
     Dim BirdPic As Image = RockDodger.My.Resources.giphy
     Dim currentBirdXPosition As Integer = 250
     Dim currentBirdYPosition As Integer = 250
-    Dim gameBoard(20, 20) As PictureBox ''Currently not using this variable, might use later
-    Dim emptyGameBoard As GraphicsContainer
-    Dim emptyGameState As GraphicsState
-    Dim currentBirdLocation As Region
-    Dim path As New GraphicsPath()
+
     Private Sub StartGame_Click(sender As Object, e As EventArgs) Handles StartGame.Click
 
         Console.WriteLine("Start game was selected!")
         Console.ReadLine()
-        ''Dim pb As New PictureBox
-        ''pb.Width = 100 'or whatever
-        ''pb.Height = 200
-        ''pb.Top = 50 'or whatever
-        ''pb.Left = 50
-        ''pb.ImageLocation = "cannon.png"
 
-        ''Me.Controls.Add(pb)
-
-        ''Call gr.DrawImage(CannonPic, intX, intY, Square_Size, Square_Size)
-        ''This subroutine will be called everytime the bird changes positions
+        'Draw the initial board
         RedrawBoard(currentBirdXPosition, currentBirdYPosition)
+
+        'Create/Summon a rock
+        Dim firstRock As Rock = New Rock()
+        gr.DrawImage(RockPic, firstRock.X, firstRock.Y, Square_Size, Square_Size)
+
 
     End Sub
 
@@ -46,29 +38,18 @@ Public Class Form1
         For intX = 0 To Board_Width - 1 Step Square_Size
             For intY = 0 To Board_Height - 1 Step Square_Size
                 gr.DrawRectangle(Pens.Red, intX, intY, Square_Size, Square_Size)
+                'Cannons
                 If intY = 450 Then
                     Call gr.DrawImage(CannonPic, intX, intY, Square_Size, Square_Size)
                 End If
             Next
         Next
-        'emptyGameState = gr.Save()
-        'emptyGameBoard = gr.EndContainer(emptyGameBoard)
-        'Dim birdPoints As Point() = {
-        'Dim test As Image
+
         Call gr.DrawImage(BirdPic, birdXPosition, birdYPosition, Square_Size, Square_Size)
-
-        'Dim myRect2 As New Rectangle()
-        'myRect2.Size = New Size(Square_Size, Square_Size)
-        'myRect2.Location = New Point(currentBirdXPosition, currentBirdYPosition)
-        'Dim pathRect = myRect2
-
-        'path.AddRectangle(myRect2)
-        'currentBirdLocation = New Region(New Rectangle(birdXPosition, birdYPosition, Square_Size, Square_Size))
-        'currentBirdLocation = New Region(path)
 
     End Sub
 
-    ''On Load
+    'On Load
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
 
@@ -83,28 +64,19 @@ Public Class Form1
 
         GameBox.Width = Board_Width
         GameBox.Height = Board_Height
-        'gr.Restore(emptyGameState)
-        'gr.EndContainer(emptyGameBoard)
-        'emptyGameBoard = gr.BeginContainer()
-        'Me.Invalidate(currentBirdLocation)
-        Dim myRect2 As New Rectangle()
-        myRect2.Size = New Size(Square_Size, Square_Size)
-        myRect2.Location = New Point(currentBirdXPosition, currentBirdYPosition)
+
+        Dim birdLocation As New Rectangle()
+        birdLocation.Size = New Size(Square_Size, Square_Size)
+        birdLocation.Location = New Point(currentBirdXPosition, currentBirdYPosition)
         Dim whiteBrush As New SolidBrush(Color.White)
-        gr.FillRectangle(whiteBrush, myRect2)
+        gr.FillRectangle(whiteBrush, birdLocation)
         gr.DrawRectangle(Pens.Red, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
-        'gr.ExcludeClip(New Rectangle(currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size))
-        'currentBirdLocation.Dispose()
 
         Select Case keyData
             Case Keys.Up
-                'gr.DrawImage(RockPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
-                ''Change current position of the bird
+                'Change current position of the bird
                 currentBirdYPosition -= 50
-                ''Test to make sure that bird isn't outside of game board
-                If currentBirdYPosition > 500 Then
-                    currentBirdYPosition = 500
-                End If
+                'Test to make sure that bird isn't outside of game board
                 If currentBirdYPosition < 0 Then
                     currentBirdYPosition = 0
                 End If
@@ -115,14 +87,11 @@ Public Class Form1
                 Return True ' <-- If you want to suppress default handling of arrow keys
 
             Case Keys.Right
-                ''Change current position of the bird
+                'Change current position of the bird
                 currentBirdXPosition += 50
-                ''Test to make sure that bird isn't outside of game board
-                If currentBirdXPosition > 500 Then
-                    currentBirdXPosition = 500
-                End If
-                If currentBirdXPosition < 0 Then
-                    currentBirdXPosition = 0
+                'Test to make sure that bird isn't outside of game board
+                If currentBirdXPosition > 450 Then
+                    currentBirdXPosition = 450
                 End If
 
                 Debug.Print("Right")
@@ -131,15 +100,11 @@ Public Class Form1
                 Return True ' <-- If you want to suppress default handling of arrow keys
 
             Case Keys.Down
-
-                ''Change current position of the bird
+                'Change current position of the bird
                 currentBirdYPosition += 50
-                ''Test to make sure that bird isn't outside of game board
-                If currentBirdYPosition > 500 Then
-                    currentBirdYPosition = 500
-                End If
-                If currentBirdYPosition < 0 Then
-                    currentBirdYPosition = 0
+                'Test to make sure that bird isn't outside of game board
+                If currentBirdYPosition > 400 Then
+                    currentBirdYPosition = 400
                 End If
 
                 Debug.Print("Down")
@@ -149,9 +114,8 @@ Public Class Form1
 
             Case Keys.Left
                 currentBirdXPosition -= 50
-                If currentBirdXPosition > 500 Then
-                    currentBirdXPosition = 500
-                End If
+
+                'Test to make sure that bird isn't outside of game board
                 If currentBirdXPosition < 0 Then
                     currentBirdXPosition = 0
                 End If
@@ -161,8 +125,6 @@ Public Class Form1
                 Return True ' <-- If you want to suppress default handling of arrow keys
 
         End Select
-        'gr.EndContainer(emptyGameBoard)
-        'Draw the new location of the bird
 
 
         Return MyBase.ProcessCmdKey(msg, keyData)
