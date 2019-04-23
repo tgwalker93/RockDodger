@@ -15,6 +15,8 @@ Public Class Form1
     Dim gameBoard(20, 20) As PictureBox ''Currently not using this variable, might use later
     Dim emptyGameBoard As GraphicsContainer
     Dim emptyGameState As GraphicsState
+    Dim currentBirdLocation As Region
+    Dim path As New GraphicsPath()
     Private Sub StartGame_Click(sender As Object, e As EventArgs) Handles StartGame.Click
 
         Console.WriteLine("Start game was selected!")
@@ -35,22 +37,35 @@ Public Class Form1
     End Sub
 
     Private Sub RedrawBoard(birdXPosition As Integer, birdYPosition As Integer)
-        'emptyGameBoard = gr.BeginContainer
+
         GameBox.Width = Board_Width
         GameBox.Height = Board_Height
         gr = GameBox.CreateGraphics
+
         gr.Clear(Color.White)
         For intX = 0 To Board_Width - 1 Step Square_Size
             For intY = 0 To Board_Height - 1 Step Square_Size
-                gr.DrawRectangle(Pens.Green, intX, intY, Square_Size, Square_Size)
+                gr.DrawRectangle(Pens.Red, intX, intY, Square_Size, Square_Size)
                 If intY = 450 Then
                     Call gr.DrawImage(CannonPic, intX, intY, Square_Size, Square_Size)
                 End If
             Next
         Next
-        emptyGameState = gr.Save()
-        'gr.EndContainer(emptyGameBoard)
+        'emptyGameState = gr.Save()
+        'emptyGameBoard = gr.EndContainer(emptyGameBoard)
+        'Dim birdPoints As Point() = {
+        'Dim test As Image
         Call gr.DrawImage(BirdPic, birdXPosition, birdYPosition, Square_Size, Square_Size)
+
+        'Dim myRect2 As New Rectangle()
+        'myRect2.Size = New Size(Square_Size, Square_Size)
+        'myRect2.Location = New Point(currentBirdXPosition, currentBirdYPosition)
+        'Dim pathRect = myRect2
+
+        'path.AddRectangle(myRect2)
+        'currentBirdLocation = New Region(New Rectangle(birdXPosition, birdYPosition, Square_Size, Square_Size))
+        'currentBirdLocation = New Region(path)
+
     End Sub
 
     ''On Load
@@ -68,8 +83,18 @@ Public Class Form1
 
         GameBox.Width = Board_Width
         GameBox.Height = Board_Height
-        gr = GameBox.CreateGraphics
-        gr.Restore(emptyGameState)
+        'gr.Restore(emptyGameState)
+        'gr.EndContainer(emptyGameBoard)
+        'emptyGameBoard = gr.BeginContainer()
+        'Me.Invalidate(currentBirdLocation)
+        Dim myRect2 As New Rectangle()
+        myRect2.Size = New Size(Square_Size, Square_Size)
+        myRect2.Location = New Point(currentBirdXPosition, currentBirdYPosition)
+        Dim whiteBrush As New SolidBrush(Color.White)
+        gr.FillRectangle(whiteBrush, myRect2)
+        gr.DrawRectangle(Pens.Red, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
+        'gr.ExcludeClip(New Rectangle(currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size))
+        'currentBirdLocation.Dispose()
 
         Select Case keyData
             Case Keys.Up
@@ -136,7 +161,7 @@ Public Class Form1
                 Return True ' <-- If you want to suppress default handling of arrow keys
 
         End Select
-
+        'gr.EndContainer(emptyGameBoard)
         'Draw the new location of the bird
 
 
