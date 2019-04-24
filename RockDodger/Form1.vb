@@ -1,5 +1,6 @@
 ﻿Option Strict On
 Imports System.Drawing.Drawing2D
+Imports System.Timers
 
 Public Class Form1
 
@@ -12,7 +13,8 @@ Public Class Form1
     Dim BirdPic As Image = RockDodger.My.Resources.giphy
     Dim currentBirdXPosition As Integer = 250
     Dim currentBirdYPosition As Integer = 250
-
+    Private aTimer As System.Timers.Timer
+    Dim count As Integer = 0
     Private Sub StartGame_Click(sender As Object, e As EventArgs) Handles StartGame.Click
 
         Console.WriteLine("Start game was selected!")
@@ -57,8 +59,57 @@ Public Class Form1
         Me.KeyPreview = True
 
 
+        'TIMER STUFF -----
+        SetTimer()
+
+        Console.WriteLine("{0}Press the Enter key to exit the application...{0}",
+                        vbCrLf)
+        Console.WriteLine("The application started at {0:HH:mm:ss.fff}",
+                        DateTime.Now)
+        Console.ReadLine()
+
+        aTimer.Start()
+        Label1.Text = CStr(count)
+        'aTimer.Stop()
+        'aTimer.Dispose()
+
+        'Console.WriteLine("Terminating the application...")
+
 
     End Sub
+
+
+    'This is the method to run when the timer is raised.
+    'Private Shared Sub TimerEventProcessor(ByVal myObject As Object,
+    ' ByVal myEventArgs As EventArgs) _
+    'Handles aTimer.Tick
+    ' Dim counter As Integer
+    'counter = counter + 1
+    'Label1.Text = counter
+    'End Sub
+
+
+    Private Sub SetTimer()
+        ' Create a timer with a one second interval.
+        aTimer = New System.Timers.Timer(1000)
+        ' Hook up the Elapsed event for the timer. 
+        AddHandler aTimer.Elapsed, AddressOf OnTimedEvent
+        aTimer.AutoReset = True
+        aTimer.Enabled = True
+    End Sub
+    ' The event handler for the Timer.Elapsed event. 
+    Private Sub OnTimedEvent(source As Object, e As ElapsedEventArgs)
+        count = count + 1
+
+        'We have to use BeginInvoke because we need to update Label1 from another thread. 
+        Me.BeginInvoke(Sub() Me.Label1.Text = CStr(count))
+
+        'Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
+        'e.SignalTime)
+        'Console.WriteLine(e.SignalTime.ToString("yyyy-MM-dd HH:mm:ss"))
+    End Sub
+
+    ' ------ End Timer Stuff
 
     Protected Overrides Function ProcessCmdKey(ByRef msg As System.Windows.Forms.Message, keyData As System.Windows.Forms.Keys) As Boolean
 
@@ -129,6 +180,7 @@ Public Class Form1
 
         Return MyBase.ProcessCmdKey(msg, keyData)
     End Function
+
 
     '   Private Sub changeBirdPosition(xPosition As Integer, yPosition As Integer, direction As String)
     '   Select Case direction
