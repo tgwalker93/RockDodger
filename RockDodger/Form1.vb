@@ -15,6 +15,9 @@ Public Class Form1
     Dim currentBirdYPosition As Integer = 250
     Private aTimer As System.Timers.Timer
     Dim count As Integer = 0
+    Dim firstRock As Rock = New Rock()
+    Dim rockGr As Graphics
+
     Private Sub StartGame_Click(sender As Object, e As EventArgs) Handles StartGame.Click
 
         Console.WriteLine("Start game was selected!")
@@ -23,10 +26,49 @@ Public Class Form1
         'Draw the initial board
         RedrawBoard(currentBirdXPosition, currentBirdYPosition)
 
+        'Summon a rock
+        gr.DrawImage(RockPic, firstRock.X, firstRock.Y, Square_Size, Square_Size)
+        StartTimer()
+
+        rockGr = GameBox.CreateGraphics()
+    End Sub
+
+
+    'Create Lock to prevent rock image being edited from two different threads at the same time (InvalidOperationException)
+    'Private Object _locker = New Object();
+
+    'Handling of multiple rocks
+    Private Sub createRocks()
         'Create/Summon a rock
         Dim firstRock As Rock = New Rock()
         gr.DrawImage(RockPic, firstRock.X, firstRock.Y, Square_Size, Square_Size)
+    End Sub
 
+    Private Sub moveRock(currentRock As Rock)
+        'Create Rectangle where position would be at current location of rock
+        Dim rockLocation As New Rectangle()
+        rockLocation.Size = New Size(Square_Size, Square_Size)
+        rockLocation.Location = New Point(currentRock.X, currentRock.Y)
+        'Fill Location of the Bird
+        Dim whiteBrush As New SolidBrush(Color.White)
+        rockGr.FillRectangle(whiteBrush, rockLocation)
+
+
+        currentRock.Y -= 50
+
+        'currentRock.Y = currentRock.Y - 50
+        If currentRock.Y < 0 Then
+            currentRock.Y = 400
+            Return
+        End If
+        Console.WriteLine("Current Rock X" & currentRock.X)
+        Console.WriteLine("Current ROck Y " & currentRock.Y)
+        Console.ReadLine()
+
+        'Fill blank square in old rock's position 
+        rockGr.DrawRectangle(Pens.Red, currentRock.X, currentRock.Y, Square_Size, Square_Size)
+        'Insert Rock into new position
+        Call rockGr.DrawImage(RockPic, currentRock.X, currentRock.Y, Square_Size, Square_Size)
 
     End Sub
 
@@ -60,6 +102,26 @@ Public Class Form1
 
 
         'TIMER STUFF -----
+        'SetTimer()
+
+        'Console.WriteLine("{0}Press the Enter key to exit the application...{0}",
+        'vbCrLf)
+        'Console.WriteLine("The application started at {0:HH:mm:ss.fff}",
+        'DateTime.Now)
+        'Console.ReadLine()
+
+        'aTimer.Start()
+        'Label1.Text = CStr(count)
+        'aTimer.Stop()
+        'aTimer.Dispose()
+
+        'Console.WriteLine("Terminating the application...")
+
+
+    End Sub
+
+
+    Private Sub StartTimer()
         SetTimer()
 
         Console.WriteLine("{0}Press the Enter key to exit the application...{0}",
@@ -70,23 +132,8 @@ Public Class Form1
 
         aTimer.Start()
         Label1.Text = CStr(count)
-        'aTimer.Stop()
-        'aTimer.Dispose()
-
-        'Console.WriteLine("Terminating the application...")
-
-
     End Sub
 
-
-    'This is the method to run when the timer is raised.
-    'Private Shared Sub TimerEventProcessor(ByVal myObject As Object,
-    ' ByVal myEventArgs As EventArgs) _
-    'Handles aTimer.Tick
-    ' Dim counter As Integer
-    'counter = counter + 1
-    'Label1.Text = counter
-    'End Sub
 
 
     Private Sub SetTimer()
@@ -97,7 +144,8 @@ Public Class Form1
         aTimer.AutoReset = True
         aTimer.Enabled = True
     End Sub
-    ' The event handler for the Timer.Elapsed event. 
+
+    ' The event handler for the Timer.Elapsed event. (Whenever the timer ticks, this is called)
     Private Sub OnTimedEvent(source As Object, e As ElapsedEventArgs)
         count = count + 1
 
@@ -107,6 +155,11 @@ Public Class Form1
         'Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
         'e.SignalTime)
         'Console.WriteLine(e.SignalTime.ToString("yyyy-MM-dd HH:mm:ss"))
+
+        Console.WriteLine("--Current Rock X" & firstRock.X)
+        Console.WriteLine("Current ROck Y " & firstRock.Y)
+        Console.ReadLine()
+        moveRock(firstRock)
     End Sub
 
     ' ------ End Timer Stuff
@@ -116,11 +169,15 @@ Public Class Form1
         GameBox.Width = Board_Width
         GameBox.Height = Board_Height
 
+
+        'Create Rectangle where position would be at current location of bird
         Dim birdLocation As New Rectangle()
         birdLocation.Size = New Size(Square_Size, Square_Size)
         birdLocation.Location = New Point(currentBirdXPosition, currentBirdYPosition)
+        'Fill Location of the Bird
         Dim whiteBrush As New SolidBrush(Color.White)
         gr.FillRectangle(whiteBrush, birdLocation)
+        'Insert blank square into old location 
         gr.DrawRectangle(Pens.Red, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
 
         Select Case keyData
