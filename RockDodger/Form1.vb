@@ -9,7 +9,7 @@ Public Class Form1
     Const Board_Width = 500
     Const Board_Height = 500
     Dim CannonPic As Image = RockDodger.My.Resources.cannon
-    Dim RockPic As Image = RockDodger.My.Resources.RockSprite
+    Dim RockPic As Image = RockDodger.My.Resources.brownAsteroid
     Dim BirdPic As Image = RockDodger.My.Resources.giphy
     Dim currentBirdXPosition As Integer = 250
     Dim currentBirdYPosition As Integer = 250
