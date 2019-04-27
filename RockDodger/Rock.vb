@@ -7,15 +7,25 @@ Public Class Rock
     Private yPosition As Integer
     Private currentTimePrivate As Integer
     Private maxTimePrivate As Integer
-    Public random As New Random
+    Private random As New Random
+    Public graphicsObj As Graphics
+
     Sub New()
         MyBase.New()
         'All Rocks start from 400 on the Y axis (just above the cannons) 
         yPosition = 400
         'Multiples of 50 from 0 to 500 (min and max width of the game board) 
         xPosition = random.Next(0, 10) * 50
-    End Sub
 
+    End Sub
+    Sub New(xArg As Integer)
+        MyBase.New()
+        'All Rocks start from 400 on the Y axis (just above the cannons) 
+        yPosition = 400
+        'Multiples of 50 from 0 to 500 (min and max width of the game board) 
+        xPosition = xArg
+
+    End Sub
     Public Property X As Integer
         Get
             Return xPosition

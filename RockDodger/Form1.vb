@@ -17,7 +17,7 @@ Public Class Form1
     Dim count As Integer = 0
     Dim firstRock As Rock = New Rock()
     Dim rockGr As Graphics
-
+    Dim rockArray As New List(Of Rock)
     Private Sub StartGame_Click(sender As Object, e As EventArgs) Handles StartGame.Click
 
         Console.WriteLine("Start game was selected!")
@@ -27,48 +27,88 @@ Public Class Form1
         RedrawBoard(currentBirdXPosition, currentBirdYPosition)
 
         'Summon a rock
-        gr.DrawImage(RockPic, firstRock.X, firstRock.Y, Square_Size, Square_Size)
+        'gr.DrawImage(RockPic, firstRock.X, firstRock.Y, Square_Size, Square_Size)
         StartTimer()
 
-        rockGr = GameBox.CreateGraphics()
+        'firstRock.graphicsObj = GameBox.CreateGraphics()
+
+        'Initialize a rock object for every posible x position on the grid
+        Dim currentX As Integer = 0
+        For index As Integer = 0 To 9
+            Dim currentRock As Rock = New Rock(currentX)
+            rockArray.Add(currentRock)
+            currentX = currentX + 50
+            currentRock.graphicsObj = GameBox.CreateGraphics()
+        Next
+
+
     End Sub
 
 
     'Create Lock to prevent rock image being edited from two different threads at the same time (InvalidOperationException)
     'Private Object _locker = New Object();
 
-    'Handling of multiple rocks
-    Private Sub createRocks()
-        'Create/Summon a rock
-        Dim firstRock As Rock = New Rock()
-        gr.DrawImage(RockPic, firstRock.X, firstRock.Y, Square_Size, Square_Size)
-    End Sub
 
-    Private Sub moveRock(currentRock As Rock)
+
+    Private Sub moveOneRock(currentRock As Rock)
+
+        Call currentRock.graphicsObj.DrawImage(RockPic, currentRock.X, currentRock.Y, Square_Size, Square_Size)
         'Create Rectangle where position would be at current location of rock
         Dim rockLocation As New Rectangle()
         rockLocation.Size = New Size(Square_Size, Square_Size)
         rockLocation.Location = New Point(currentRock.X, currentRock.Y)
         'Fill Location of the Bird
         Dim whiteBrush As New SolidBrush(Color.White)
-        rockGr.FillRectangle(whiteBrush, rockLocation)
 
+        currentRock.graphicsObj.FillRectangle(whiteBrush, rockLocation)
+
+
+        'Fill blank square in old rock's position 
+        currentRock.graphicsObj.DrawRectangle(Pens.Red, currentRock.X, currentRock.Y, Square_Size, Square_Size)
 
         currentRock.Y -= 50
 
         'currentRock.Y = currentRock.Y - 50
         If currentRock.Y < 0 Then
+            'currentRock.Y = 450
             currentRock.Y = 400
+            'I have to redraw the cannonPic becuase for some reason this is getting deleted 
+            Call gr.DrawImage(RockPic, currentRock.X, 400, Square_Size, Square_Size)
             Return
         End If
         Console.WriteLine("Current Rock X" & currentRock.X)
         Console.WriteLine("Current ROck Y " & currentRock.Y)
         Console.ReadLine()
 
-        'Fill blank square in old rock's position 
-        rockGr.DrawRectangle(Pens.Red, currentRock.X, currentRock.Y, Square_Size, Square_Size)
         'Insert Rock into new position
-        Call rockGr.DrawImage(RockPic, currentRock.X, currentRock.Y, Square_Size, Square_Size)
+        Call currentRock.graphicsObj.DrawImage(RockPic, currentRock.X, currentRock.Y, Square_Size, Square_Size)
+
+    End Sub
+
+    Private Function findRockInList(ByVal r As Rock, xLocation As Integer) As Boolean
+        Return (r.X = xLocation)
+    End Function
+
+    Private Sub moveRocks()
+
+        Dim random As New Random
+        Dim numberOfRocksInARow = random.Next(4, 8)
+        Dim currentRandomXLocation As Integer
+        Dim listOfUsedRockXLocations As New List(Of Integer)
+        For i As Integer = 0 To numberOfRocksInARow
+            currentRandomXLocation = random.Next(0, 10) * 50
+            While CBool(listOfUsedRockXLocations.Find(Function(value As Integer) value = currentRandomXLocation))
+                currentRandomXLocation = random.Next(0, 10) * 50
+            End While
+            listOfUsedRockXLocations.Add(currentRandomXLocation)
+            Dim rockFound As Rock = rockArray.Find(Function(r) r.X = currentRandomXLocation)
+            moveOneRock(rockFound)
+        Next
+        'For Each rock As Rock In rockArray
+        'currentRandomXLocation = random.Next(0, 10)
+        'moveOneRock(rock)
+        '  gr.DrawImage(RockPic, firstRock.X, firstRock.Y, Square_Size, Square_Size)
+        '  Next
 
     End Sub
 
@@ -131,7 +171,7 @@ Public Class Form1
         Console.ReadLine()
 
         aTimer.Start()
-        Label1.Text = CStr(count)
+        TimeValue.Text = CStr(count)
     End Sub
 
 
@@ -150,16 +190,13 @@ Public Class Form1
         count = count + 1
 
         'We have to use BeginInvoke because we need to update Label1 from another thread. 
-        Me.BeginInvoke(Sub() Me.Label1.Text = CStr(count))
+        Me.BeginInvoke(Sub() Me.TimeValue.Text = CStr(count))
 
         'Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
         'e.SignalTime)
         'Console.WriteLine(e.SignalTime.ToString("yyyy-MM-dd HH:mm:ss"))
 
-        Console.WriteLine("--Current Rock X" & firstRock.X)
-        Console.WriteLine("Current ROck Y " & firstRock.Y)
-        Console.ReadLine()
-        moveRock(firstRock)
+        moveRocks()
     End Sub
 
     ' ------ End Timer Stuff

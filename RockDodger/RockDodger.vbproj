@@ -126,7 +126,7 @@
     <None Include="Resources\giphy.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\RockSprite.jpg" />
+    <Content Include="Resources\RockSprite.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
