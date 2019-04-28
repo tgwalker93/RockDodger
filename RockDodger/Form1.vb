@@ -5,6 +5,7 @@ Imports System.Timers
 Public Class Form1
 
     Dim gr As Graphics
+    Dim birdMovegr As Graphics
     Const Square_Size = 50
     Const Board_Width = 500
     Const Board_Height = 500
@@ -18,11 +19,14 @@ Public Class Form1
     Dim firstRock As Rock = New Rock()
     Dim rockGr As Graphics
     Dim rockArray As New List(Of Rock)
+    Dim GameIsActive As Boolean = False
+    Dim HighScore As Integer = 0
     Private Sub StartGame_Click(sender As Object, e As EventArgs) Handles StartGame.Click
-
+        GameIsActive = True
         Console.WriteLine("Start game was selected!")
         Console.ReadLine()
-
+        EndGame.Show()
+        StartGame.Hide()
         'Draw the initial board
         RedrawBoard(currentBirdXPosition, currentBirdYPosition)
 
@@ -44,6 +48,25 @@ Public Class Form1
 
     End Sub
 
+    Private Sub EndGame_Click(sender As Object, e As EventArgs) Handles EndGame.Click
+        StopGame()
+    End Sub
+    Private Sub StopGame()
+        GameIsActive = False
+        currentBirdXPosition = 250
+        currentBirdYPosition = 250
+
+        If count > HighScore Then
+            HighScore = count
+        End If
+        StartGame.Show()
+        EndGame.Hide()
+        Me.HighScoreValue.Text = CStr(HighScore)
+        Me.TimeValue.Text = "0"
+        count = 0
+        aTimer.Stop()
+        aTimer.Dispose()
+    End Sub
 
     'Create Lock to prevent rock image being edited from two different threads at the same time (InvalidOperationException)
     'Private Object _locker = New Object();
@@ -68,6 +91,10 @@ Public Class Form1
 
         currentRock.Y -= 50
 
+        'If currentRock.Y = currentBirdYPosition AndAlso currentRock.X = currentBirdXPosition Then
+        'StopGame()
+        'Return
+        'End If
         'currentRock.Y = currentRock.Y - 50
         If currentRock.Y < 0 Then
             'currentRock.Y = 450
@@ -76,9 +103,6 @@ Public Class Form1
             Call gr.DrawImage(RockPic, currentRock.X, 400, Square_Size, Square_Size)
             Return
         End If
-        Console.WriteLine("Current Rock X" & currentRock.X)
-        Console.WriteLine("Current ROck Y " & currentRock.Y)
-        Console.ReadLine()
 
         'Insert Rock into new position
         Call currentRock.graphicsObj.DrawImage(RockPic, currentRock.X, currentRock.Y, Square_Size, Square_Size)
@@ -135,29 +159,8 @@ Public Class Form1
 
     'On Load
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
-
-
-
         Me.KeyPreview = True
-
-
-        'TIMER STUFF -----
-        'SetTimer()
-
-        'Console.WriteLine("{0}Press the Enter key to exit the application...{0}",
-        'vbCrLf)
-        'Console.WriteLine("The application started at {0:HH:mm:ss.fff}",
-        'DateTime.Now)
-        'Console.ReadLine()
-
-        'aTimer.Start()
-        'Label1.Text = CStr(count)
-        'aTimer.Stop()
-        'aTimer.Dispose()
-
-        'Console.WriteLine("Terminating the application...")
-
-
+        EndGame.Hide()
     End Sub
 
 
@@ -199,23 +202,34 @@ Public Class Form1
         moveRocks()
     End Sub
 
-    ' ------ End Timer Stuff
+
+    'This function will end the game if the current bird position is at a rock position
+    Sub checkIfBirdCollidedWithRock()
+        For Each rock In rockArray
+            If currentBirdXPosition = rock.X AndAlso currentBirdYPosition = rock.Y Then
+                Debug.Print("currentBird Position is same as a rock position")
+                StopGame()
+            End If
+        Next
+    End Sub
 
     Protected Overrides Function ProcessCmdKey(ByRef msg As System.Windows.Forms.Message, keyData As System.Windows.Forms.Keys) As Boolean
-
+        If GameIsActive = False Then
+            Return Nothing
+        End If
         GameBox.Width = Board_Width
         GameBox.Height = Board_Height
 
-
+        birdMovegr = GameBox.CreateGraphics
         'Create Rectangle where position would be at current location of bird
         Dim birdLocation As New Rectangle()
         birdLocation.Size = New Size(Square_Size, Square_Size)
         birdLocation.Location = New Point(currentBirdXPosition, currentBirdYPosition)
         'Fill Location of the Bird
         Dim whiteBrush As New SolidBrush(Color.White)
-        gr.FillRectangle(whiteBrush, birdLocation)
+        birdMovegr.FillRectangle(whiteBrush, birdLocation)
         'Insert blank square into old location 
-        gr.DrawRectangle(Pens.Red, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
+        birdMovegr.DrawRectangle(Pens.Red, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
 
         Select Case keyData
             Case Keys.Up
@@ -228,7 +242,7 @@ Public Class Form1
 
                 Debug.Print("Up")
                 'RedrawBoard(currentBirdXPosition, currentBirdYPosition)
-                Call gr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
+                Call birdMovegr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
                 Return True ' <-- If you want to suppress default handling of arrow keys
 
             Case Keys.Right
@@ -241,7 +255,7 @@ Public Class Form1
 
                 Debug.Print("Right")
                 'RedrawBoard(currentBirdXPosition, currentBirdYPosition)
-                Call gr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
+                Call birdMovegr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
                 Return True ' <-- If you want to suppress default handling of arrow keys
 
             Case Keys.Down
@@ -254,7 +268,7 @@ Public Class Form1
 
                 Debug.Print("Down")
                 'RedrawBoard(currentBirdXPosition, currentBirdYPosition)
-                Call gr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
+                Call birdMovegr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
                 Return True ' <-- If you want to suppress default handling of arrow keys
 
             Case Keys.Left
@@ -266,14 +280,15 @@ Public Class Form1
                 End If
                 Debug.Print("Left")
                 'RedrawBoard(currentBirdXPosition, currentBirdYPosition)
-                Call gr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
+                Call birdMovegr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
                 Return True ' <-- If you want to suppress default handling of arrow keys
 
         End Select
 
-
+        'checkIfBirdCollidedWithRock()
         Return MyBase.ProcessCmdKey(msg, keyData)
     End Function
+
 
 
     '   Private Sub changeBirdPosition(xPosition As Integer, yPosition As Integer, direction As String)
