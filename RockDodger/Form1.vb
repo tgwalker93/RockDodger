@@ -22,6 +22,7 @@ Public Class Form1
     Dim GameIsActive As Boolean = False
     Dim HighScore As Integer = 0
     Private Sub StartGame_Click(sender As Object, e As EventArgs) Handles StartGame.Click
+        rockArray.Clear()
         GameIsActive = True
         Console.WriteLine("Start game was selected!")
         Console.ReadLine()
@@ -91,10 +92,11 @@ Public Class Form1
 
         currentRock.Y -= 50
 
-        'If currentRock.Y = currentBirdYPosition AndAlso currentRock.X = currentBirdXPosition Then
-        'StopGame()
-        'Return
-        'End If
+        If currentRock.Y = currentBirdYPosition AndAlso currentRock.X = currentBirdXPosition Then
+            Debug.Print("StopGame Called!")
+            Me.Invoke(Sub() StopGame())
+            Return
+        End If
         'currentRock.Y = currentRock.Y - 50
         If currentRock.Y < 0 Then
             'currentRock.Y = 450
@@ -207,8 +209,8 @@ Public Class Form1
     Sub checkIfBirdCollidedWithRock()
         For Each rock In rockArray
             If currentBirdXPosition = rock.X AndAlso currentBirdYPosition = rock.Y Then
-                Debug.Print("currentBird Position is same as a rock position")
-                StopGame()
+                Debug.Print("StopGame Called via Bird movement")
+                Me.Invoke(Sub() StopGame())
             End If
         Next
     End Sub
@@ -239,7 +241,7 @@ Public Class Form1
                 If currentBirdYPosition < 0 Then
                     currentBirdYPosition = 0
                 End If
-
+                checkIfBirdCollidedWithRock()
                 Debug.Print("Up")
                 'RedrawBoard(currentBirdXPosition, currentBirdYPosition)
                 Call birdMovegr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
@@ -252,7 +254,7 @@ Public Class Form1
                 If currentBirdXPosition > 450 Then
                     currentBirdXPosition = 450
                 End If
-
+                checkIfBirdCollidedWithRock()
                 Debug.Print("Right")
                 'RedrawBoard(currentBirdXPosition, currentBirdYPosition)
                 Call birdMovegr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
@@ -265,7 +267,7 @@ Public Class Form1
                 If currentBirdYPosition > 400 Then
                     currentBirdYPosition = 400
                 End If
-
+                checkIfBirdCollidedWithRock()
                 Debug.Print("Down")
                 'RedrawBoard(currentBirdXPosition, currentBirdYPosition)
                 Call birdMovegr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
@@ -278,6 +280,7 @@ Public Class Form1
                 If currentBirdXPosition < 0 Then
                     currentBirdXPosition = 0
                 End If
+                checkIfBirdCollidedWithRock()
                 Debug.Print("Left")
                 'RedrawBoard(currentBirdXPosition, currentBirdYPosition)
                 Call birdMovegr.DrawImage(BirdPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
@@ -285,7 +288,6 @@ Public Class Form1
 
         End Select
 
-        'checkIfBirdCollidedWithRock()
         Return MyBase.ProcessCmdKey(msg, keyData)
     End Function
 
