@@ -12,15 +12,20 @@ Public Class Form1
     Dim CannonPic As Image = RockDodger.My.Resources.cannon
     Dim RockPic As Image = RockDodger.My.Resources.brownAsteroid
     Dim BirdPic As Image = RockDodger.My.Resources.giphy
+    Dim ExplosionPic As Image = RockDodger.My.Resources.Explosion
     Dim currentBirdXPosition As Integer = 250
     Dim currentBirdYPosition As Integer = 250
-    Private aTimer As System.Timers.Timer
+    Private levelTimer As System.Timers.Timer
+    Private secondsSinceGameStart As System.Timers.Timer
+    Dim gameSpeed As Integer = 500
     Dim count As Integer = 0
     Dim firstRock As Rock = New Rock()
     Dim rockGr As Graphics
     Dim rockArray As New List(Of Rock)
     Dim GameIsActive As Boolean = False
     Dim HighScore As Integer = 0
+    Dim currentLevelTime As Integer
+    Dim currentLevel As Integer = 1
     Private Sub StartGame_Click(sender As Object, e As EventArgs) Handles StartGame.Click
         rockArray.Clear()
         GameIsActive = True
@@ -54,8 +59,7 @@ Public Class Form1
     End Sub
     Private Sub StopGame()
         GameIsActive = False
-        currentBirdXPosition = 250
-        currentBirdYPosition = 250
+
 
         If count > HighScore Then
             HighScore = count
@@ -65,8 +69,12 @@ Public Class Form1
         Me.HighScoreValue.Text = CStr(HighScore)
         Me.TimeValue.Text = "0"
         count = 0
-        aTimer.Stop()
-        aTimer.Dispose()
+        levelTimer.Stop()
+        levelTimer.Dispose()
+        'secondsSinceGameStart.Stop()
+        'secondsSinceGameStart.Dispose()
+        secondTimer.Stop()
+        secondTimer.Dispose()
     End Sub
 
     'Create Lock to prevent rock image being edited from two different threads at the same time (InvalidOperationException)
@@ -94,6 +102,7 @@ Public Class Form1
 
         If currentRock.Y = currentBirdYPosition AndAlso currentRock.X = currentBirdXPosition Then
             Debug.Print("StopGame Called!")
+            gr.DrawImage(ExplosionPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
             Me.Invoke(Sub() StopGame())
             Return
         End If
@@ -124,6 +133,7 @@ Public Class Form1
         For i As Integer = 0 To numberOfRocksInARow
             currentRandomXLocation = random.Next(0, 10) * 50
             While CBool(listOfUsedRockXLocations.Find(Function(value As Integer) value = currentRandomXLocation))
+                'Debug.Write("Found duplicate: Current Random X Location is " & currentRandomXLocation)
                 currentRandomXLocation = random.Next(0, 10) * 50
             End While
             listOfUsedRockXLocations.Add(currentRandomXLocation)
@@ -175,41 +185,61 @@ Public Class Form1
                         DateTime.Now)
         Console.ReadLine()
 
-        aTimer.Start()
-        TimeValue.Text = CStr(count)
+        levelTimer.Start()
+        'secondsSinceGameStart.Start()
+        secondTimer.Start()
+        'TimeValue.Text = CStr(count)
     End Sub
 
 
 
     Private Sub SetTimer()
         ' Create a timer with a one second interval.
-        aTimer = New System.Timers.Timer(1000)
+        levelTimer = New System.Timers.Timer(gameSpeed)
         ' Hook up the Elapsed event for the timer. 
-        AddHandler aTimer.Elapsed, AddressOf OnTimedEvent
-        aTimer.AutoReset = True
-        aTimer.Enabled = True
+        AddHandler levelTimer.Elapsed, AddressOf OnTimedEvent
+        levelTimer.AutoReset = True
+        levelTimer.Enabled = True
+        secondTimer.Enabled = True
+
     End Sub
 
     ' The event handler for the Timer.Elapsed event. (Whenever the timer ticks, this is called)
+    'This timer event is for the speed of the game. 
     Private Sub OnTimedEvent(source As Object, e As ElapsedEventArgs)
-        count = count + 1
+        'count = count + 1
 
         'We have to use BeginInvoke because we need to update Label1 from another thread. 
-        Me.BeginInvoke(Sub() Me.TimeValue.Text = CStr(count))
+        'Me.BeginInvoke(Sub() Me.TimeValue.Text = CStr(count))
 
         'Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
         'e.SignalTime)
         'Console.WriteLine(e.SignalTime.ToString("yyyy-MM-dd HH:mm:ss"))
 
+
+        If count - currentLevelTime = 15 Then
+            currentLevelTime = count
+            gameSpeed = gameSpeed - 50
+            levelTimer.Interval = gameSpeed
+            currentLevel += 1
+            Debug.WriteLine("CURRENT LEVEL IS " & currentLevel)
+            LevelValue.Text = CStr(currentLevel)
+        End If
         moveRocks()
     End Sub
 
+    'This timer is for the game clock 
+    Private Sub secondTimer_Tick(sender As Object, e As EventArgs) Handles secondTimer.Tick
+        count = count + 1
+        TimeValue.Text = CStr(count)
+    End Sub
 
     'This function will end the game if the current bird position is at a rock position
     Sub checkIfBirdCollidedWithRock()
         For Each rock In rockArray
             If currentBirdXPosition = rock.X AndAlso currentBirdYPosition = rock.Y Then
                 Debug.Print("StopGame Called via Bird movement")
+                gr.DrawImage(ExplosionPic, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
                 Me.Invoke(Sub() StopGame())
             End If
         Next
@@ -290,6 +320,9 @@ Public Class Form1
 
         Return MyBase.ProcessCmdKey(msg, keyData)
     End Function
+
+
+
 
 
 
