@@ -17,7 +17,7 @@ Public Class Form1
     Dim currentBirdYPosition As Integer = 250
     Private levelTimer As System.Timers.Timer
     Private secondsSinceGameStart As System.Timers.Timer
-    Dim gameSpeed As Integer = 500
+    Dim gameSpeed As Integer = 100
     Dim count As Integer = 0
     Dim firstRock As Rock = New Rock()
     Dim rockGr As Graphics
@@ -90,13 +90,13 @@ Public Class Form1
         rockLocation.Size = New Size(Square_Size, Square_Size)
         rockLocation.Location = New Point(currentRock.X, currentRock.Y)
         'Fill Location of the Bird
-        Dim whiteBrush As New SolidBrush(Color.White)
+        Dim aquaBrush As New SolidBrush(Color.Aqua)
 
-        currentRock.graphicsObj.FillRectangle(whiteBrush, rockLocation)
+        currentRock.graphicsObj.FillRectangle(aquaBrush, rockLocation)
 
 
         'Fill blank square in old rock's position 
-        currentRock.graphicsObj.DrawRectangle(Pens.Red, currentRock.X, currentRock.Y, Square_Size, Square_Size)
+        'currentRock.graphicsObj.DrawRectangle(Pens.Red, currentRock.X, currentRock.Y, Square_Size, Square_Size)
 
         currentRock.Y -= 50
 
@@ -125,7 +125,6 @@ Public Class Form1
     End Function
 
     Private Sub moveRocks()
-
         Dim random As New Random
         Dim numberOfRocksInARow = random.Next(4, 8)
         Dim currentRandomXLocation As Integer
@@ -154,10 +153,10 @@ Public Class Form1
         GameBox.Height = Board_Height
         gr = GameBox.CreateGraphics
 
-        gr.Clear(Color.White)
+        gr.Clear(Color.Aqua)
         For intX = 0 To Board_Width - 1 Step Square_Size
             For intY = 0 To Board_Height - 1 Step Square_Size
-                gr.DrawRectangle(Pens.Red, intX, intY, Square_Size, Square_Size)
+                'gr.DrawRectangle(Pens.Red, intX, intY, Square_Size, Square_Size)
                 'Cannons
                 If intY = 450 Then
                     Call gr.DrawImage(CannonPic, intX, intY, Square_Size, Square_Size)
@@ -172,6 +171,10 @@ Public Class Form1
     'On Load
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         Me.KeyPreview = True
+        Panel1.Font = New Font("Comic Sans MS", 12, FontStyle.Bold Or FontStyle.Underline)
+        LevelValue.Font = New Font("Comic Sans MS", 12, FontStyle.Bold)
+        HighScoreValue.Font = New Font("Comic Sans MS", 12, FontStyle.Bold)
+        TimeValue.Font = New Font("Comic Sans MS", 12, FontStyle.Bold)
         EndGame.Hide()
     End Sub
 
@@ -204,6 +207,11 @@ Public Class Form1
 
     End Sub
 
+    Sub updateLevelText()
+        currentLevel += 1
+        Debug.WriteLine("CURRENT LEVEL IS " & currentLevel)
+        LevelValue.Text = CStr(currentLevel)
+    End Sub
     ' The event handler for the Timer.Elapsed event. (Whenever the timer ticks, this is called)
     'This timer event is for the speed of the game. 
     Private Sub OnTimedEvent(source As Object, e As ElapsedEventArgs)
@@ -216,14 +224,13 @@ Public Class Form1
         'e.SignalTime)
         'Console.WriteLine(e.SignalTime.ToString("yyyy-MM-dd HH:mm:ss"))
 
-
+        'If the different between currentLevel minimum and current time is 15 seconds, then we start new level
         If count - currentLevelTime = 15 Then
             currentLevelTime = count
             gameSpeed = gameSpeed - 50
             levelTimer.Interval = gameSpeed
-            currentLevel += 1
-            Debug.WriteLine("CURRENT LEVEL IS " & currentLevel)
-            LevelValue.Text = CStr(currentLevel)
+            Me.Invoke(Sub() updateLevelText())
+
         End If
         moveRocks()
     End Sub
@@ -258,10 +265,10 @@ Public Class Form1
         birdLocation.Size = New Size(Square_Size, Square_Size)
         birdLocation.Location = New Point(currentBirdXPosition, currentBirdYPosition)
         'Fill Location of the Bird
-        Dim whiteBrush As New SolidBrush(Color.White)
-        birdMovegr.FillRectangle(whiteBrush, birdLocation)
+        Dim aquaBrush As New SolidBrush(Color.Aqua)
+        birdMovegr.FillRectangle(aquaBrush, birdLocation)
         'Insert blank square into old location 
-        birdMovegr.DrawRectangle(Pens.Red, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
+        'birdMovegr.DrawRectangle(Pens.Red, currentBirdXPosition, currentBirdYPosition, Square_Size, Square_Size)
 
         Select Case keyData
             Case Keys.Up
@@ -323,18 +330,6 @@ Public Class Form1
 
 
 
-
-
-
-    '   Private Sub changeBirdPosition(xPosition As Integer, yPosition As Integer, direction As String)
-    '   Select Case direction
-    '   Case "Up"
-    '   Case "Right"
-    '   Case "Down"
-    '   Case "Left"
-    '
-    '    End Select
-    '    End Sub
 
 End Class
 
