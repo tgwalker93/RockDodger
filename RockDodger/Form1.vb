@@ -17,7 +17,7 @@ Public Class Form1
     Dim currentBirdYPosition As Integer = 250
     Private levelTimer As System.Timers.Timer
     Private secondsSinceGameStart As System.Timers.Timer
-    Dim gameSpeed As Integer = 100
+    Dim gameSpeed As Integer = 500
     Dim count As Integer = 0
     Dim firstRock As Rock = New Rock()
     Dim rockGr As Graphics
@@ -50,10 +50,16 @@ Public Class Form1
             currentX = currentX + 50
             currentRock.graphicsObj = GameBox.CreateGraphics()
         Next
-
-
     End Sub
 
+    Function convertSecondsToMinutes(secondsInput As Integer) As String
+        Dim hms = TimeSpan.FromSeconds(secondsInput)
+        Dim h = hms.Hours.ToString.PadLeft(2, "0"c)
+        Dim m = hms.Minutes.ToString.PadLeft(2, "0"c)
+        Dim s = hms.Seconds.ToString.PadLeft(2, "0"c)
+
+        Return m & ":" & s
+    End Function
     Private Sub EndGame_Click(sender As Object, e As EventArgs) Handles EndGame.Click
         StopGame()
     End Sub
@@ -66,8 +72,8 @@ Public Class Form1
         End If
         StartGame.Show()
         EndGame.Hide()
-        Me.HighScoreValue.Text = CStr(HighScore)
-        Me.TimeValue.Text = "0"
+        Me.HighScoreValue.Text = convertSecondsToMinutes(HighScore)
+        Me.TimeValue.Text = "0:00"
         count = 0
         levelTimer.Stop()
         levelTimer.Dispose()
@@ -171,10 +177,12 @@ Public Class Form1
     'On Load
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         Me.KeyPreview = True
-        Panel1.Font = New Font("Comic Sans MS", 12, FontStyle.Bold Or FontStyle.Underline)
+        LevelLabel.Font = New Font("Comic Sans MS", 12, FontStyle.Bold)
         LevelValue.Font = New Font("Comic Sans MS", 12, FontStyle.Bold)
         HighScoreValue.Font = New Font("Comic Sans MS", 12, FontStyle.Bold)
+        HighScoreLabel.Font = New Font("Comic Sans MS", 12, FontStyle.Bold)
         TimeValue.Font = New Font("Comic Sans MS", 12, FontStyle.Bold)
+        TimeLabel.Font = New Font("Comic Sans MS", 12, FontStyle.Bold)
         EndGame.Hide()
     End Sub
 
@@ -238,7 +246,8 @@ Public Class Form1
     'This timer is for the game clock 
     Private Sub secondTimer_Tick(sender As Object, e As EventArgs) Handles secondTimer.Tick
         count = count + 1
-        TimeValue.Text = CStr(count)
+        'TimeValue.Text = CStr(count)
+        TimeValue.Text = convertSecondsToMinutes(count)
     End Sub
 
     'This function will end the game if the current bird position is at a rock position
@@ -327,8 +336,6 @@ Public Class Form1
 
         Return MyBase.ProcessCmdKey(msg, keyData)
     End Function
-
-
 
 
 End Class
