@@ -6,26 +6,42 @@ Public Class Form1
 
     Dim gr As Graphics
     Dim birdMovegr As Graphics
+
+    'Game Board Constants
     Const Square_Size = 50
     Const Board_Width = 500
     Const Board_Height = 500
+
+    'Pictures
     Dim CannonPic As Image = RockDodger.My.Resources.cannon
     Dim RockPic As Image = RockDodger.My.Resources.brownAsteroid
     Dim BirdPic As Image = RockDodger.My.Resources.giphy
     Dim ExplosionPic As Image = RockDodger.My.Resources.Explosion
+
+    'Initial Bird Position
     Dim currentBirdXPosition As Integer = 250
     Dim currentBirdYPosition As Integer = 250
+
+    'Timers
     Private levelTimer As System.Timers.Timer
     Private secondsSinceGameStart As System.Timers.Timer
-    Dim gameSpeed As Integer = 500
+
+    'Game speed
+    Dim gameSpeed As Integer = 100
+
+    'Count used as game timer
     Dim count As Integer = 0
     Dim firstRock As Rock = New Rock()
     Dim rockGr As Graphics
     Dim rockArray As New List(Of Rock)
+
     Dim GameIsActive As Boolean = False
+
+    'Game Variables
     Dim HighScore As Integer = 0
     Dim currentLevelTime As Integer
     Dim currentLevel As Integer = 1
+
     Private Sub StartGame_Click(sender As Object, e As EventArgs) Handles StartGame.Click
         rockArray.Clear()
         GameIsActive = True
@@ -220,17 +236,10 @@ Public Class Form1
         Debug.WriteLine("CURRENT LEVEL IS " & currentLevel)
         LevelValue.Text = CStr(currentLevel)
     End Sub
-    ' The event handler for the Timer.Elapsed event. (Whenever the timer ticks, this is called)
+
+    'The event handler for the Timer.Elapsed event. (Whenever the timer ticks, this is called)
     'This timer event is for the speed of the game. 
     Private Sub OnTimedEvent(source As Object, e As ElapsedEventArgs)
-        'count = count + 1
-
-        'We have to use BeginInvoke because we need to update Label1 from another thread. 
-        'Me.BeginInvoke(Sub() Me.TimeValue.Text = CStr(count))
-
-        'Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
-        'e.SignalTime)
-        'Console.WriteLine(e.SignalTime.ToString("yyyy-MM-dd HH:mm:ss"))
 
         'If the different between currentLevel minimum and current time is 15 seconds, then we start new level
         If count - currentLevelTime = 15 Then
